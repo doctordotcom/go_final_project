@@ -20,8 +20,7 @@
 
 # Структура проекта
 
-    `cmd:`
-    -main.go (главный файл запуска приложения)
+    `main.go` (главный файл запуска приложения - ранее был в директории cmd, но так не проходили тесты гитхаба)
 
     `handlers (все обработчики запросов здесь):`
     - auth.go с обработчиком проверки аутентификации по паролю для входа в систему SignInHandler.
@@ -69,7 +68,7 @@
     Файл `scheduler.sql`, содержащий в себе инструкцию для корректной постройки базы данных.
 
 # Правильно запускать сервер:
-go build -o app ./cmd/main.go
+go build -o app ./main.go
 ./app
 
 # Команды для запуска тестов:
@@ -84,8 +83,9 @@ go build -o app ./cmd/main.go
 Шаг 7.2 - go test -run ^TestDelTask$ ./tests
 Все тесты целиком - go test ./tests
 
-# Пример запуска теста без кэша:
+# Примеры запуска тестов без кэша:
 go test -count=1 -run ^TestTasks$ ./tests
+go test -count=1 ./tests
 
 # Получение куки через терминал:
 curl -c cookies.txt -d '{"password":"12345"}' -H "Content-Type: application/json" -X POST http://localhost:7540/api/signin
