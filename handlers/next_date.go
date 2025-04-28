@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"m/global"
 	"m/rules"
 	"net/http"
 	"time"
@@ -11,7 +12,7 @@ func GetNextDateHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Проверка метода Get
 	if r.Method != http.MethodGet {
-		http.Error(w, "Метод не разрешен", http.StatusMethodNotAllowed)
+		http.Error(w, "Method is not allowed", http.StatusMethodNotAllowed)
 		return
 	}
 
@@ -22,26 +23,26 @@ func GetNextDateHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Проверка наличия всех обязательных параметров
 	if nowStr == "" || dateStr == "" || repeat == "" {
-		http.Error(w, "Параметры now, date и repeat обязательны", http.StatusBadRequest)
+		http.Error(w, "The now, date, and repeat parameters are required", http.StatusBadRequest)
 		return
 	}
 
-	// Парсинг now (преобразование строки now в объект времени в соотетствии с форматом "20060102")
-	Now, err := time.Parse("20060102", nowStr)
+	// Парсинг now (преобразование строки now в объект времени в соотетствии с форматом dateFormat "20060102")
+	Now, err := time.Parse(global.DateFormat, nowStr)
 	if err != nil {
-		http.Error(w, "Ошибка парсинга параметра now", http.StatusBadRequest)
+		http.Error(w, "Error parsing the now parameter", http.StatusBadRequest)
 		return
 	}
 
 	// Парсинг dateStr (преобразование строки date в объект времени)
-	Date, err := time.Parse("20060102", dateStr)
+	Date, err := time.Parse(global.DateFormat, dateStr)
 	if err != nil {
-		http.Error(w, "Ошибка парсинга параметра date", http.StatusBadRequest)
+		http.Error(w, "Date parameter parsing error", http.StatusBadRequest)
 		return
 	}
 
 	// Вычисление следующей даты с использованием текущей даты, исходной даты и правил повторения
-	NextDate, err := rules.NextDate(Now, Date.Format("20060102"), repeat)
+	NextDate, err := rules.NextDate(Now, Date.Format(global.DateFormat), repeat)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return

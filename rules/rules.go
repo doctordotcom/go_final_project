@@ -2,6 +2,7 @@ package rules
 
 import (
 	"errors"
+	"m/global"
 	"sort"
 	"strconv"
 	"strings"
@@ -13,13 +14,13 @@ func NextDate(now time.Time, date string, repeat string) (string, error) {
 
 	// Проверка пустой строки в repeat
 	if repeat == "" {
-		return "", errors.New("правило повторения не указано")
+		return "", errors.New("The repetition rule is not specified")
 	}
 
 	// Проверка и парсинг исходной даты
-	startDate, err := time.Parse("20060102", date)
+	startDate, err := time.Parse(global.DateFormat, date)
 	if err != nil {
-		return "", errors.New("некорректный формат даты: " + date)
+		return "", errors.New("Incorrect date format: " + date)
 	}
 
 	// Переменная для хранения следующей даты.
@@ -30,7 +31,7 @@ func NextDate(now time.Time, date string, repeat string) (string, error) {
 	repeatSlice := strings.Split(repeat, " ")
 	// Проверка корректности формата правила повторения по длине массива
 	if len(repeatSlice) < 1 || len(repeatSlice) > 3 {
-		return "", errors.New("неверный формат правила повторения: " + repeat)
+		return "", errors.New("Incorrect format of the repetition rule: " + repeat)
 	}
 	// Выбор обработки в зависимости от первого символа правила
 	switch repeatSlice[0] {
@@ -41,11 +42,11 @@ func NextDate(now time.Time, date string, repeat string) (string, error) {
 			// Чтение числа дней из правила
 			days, err := strconv.Atoi(repeatSlice[1])
 			if err != nil {
-				return "", errors.New("некорректный формат")
+				return "", errors.New("Incorrect format")
 			}
 			// Проверка корректности числа дней
 			if days < 1 || days > 400 {
-				return "", errors.New("число дней должно быть от 1 до 400")
+				return "", errors.New("The number of days should be from 1 to 400")
 			}
 			nextDate = startDate.AddDate(0, 0, days)
 			// Передвижение даты до тех пор, пока она не станет позже текущей
@@ -64,7 +65,7 @@ func NextDate(now time.Time, date string, repeat string) (string, error) {
 	// В случае w - в определённые дни недели
 	case "w":
 		if len(repeatSlice) == 1 {
-			return "", errors.New("ошибка: необходимо указать дни недели в формате 'w <days>', например, 'w 2'")
+			return "", errors.New("Error: it is necessary to specify the days of the week in the format 'w <days>', for example, 'w 2'")
 		}
 		// Массив для хранения дней недели, в которые нужно повторить событие
 		weekDays := make([]bool, 7) // понедельник-воскресенье
@@ -74,7 +75,7 @@ func NextDate(now time.Time, date string, repeat string) (string, error) {
 		for _, day := range days {
 			dayNumber, err := strconv.Atoi(day)
 			if err != nil || dayNumber < 1 || dayNumber > 7 {
-				return "", errors.New("число дней должно быть от 1 до 7 включительно, здесь их:" + day)
+				return "", errors.New("The number of days must be from 1 to 7 inclusive, here they are:" + day)
 			}
 			// Установка true для соответствующего дня
 			weekDays[dayNumber-1] = true
@@ -104,7 +105,7 @@ func NextDate(now time.Time, date string, repeat string) (string, error) {
 		daysOfMonth := parseDays(parts[0])
 		// Проверка на корректность парсинга дней
 		if daysOfMonth == nil {
-			return "", errors.New("неправильно указаны дни месяца")
+			return "", errors.New("The days of the month are specified incorrectly")
 		}
 		// Инициализация массива месяцев. По умолчанию все месяцы
 		var months []int
@@ -113,7 +114,7 @@ func NextDate(now time.Time, date string, repeat string) (string, error) {
 			months = parseMonths(parts[1])
 			// Проверка на корректность парсинга месяцев
 			if months == nil {
-				return "", errors.New("неправильно указаны месяцы")
+				return "", errors.New("The months are specified incorrectly")
 			}
 		} else {
 			// Если месяцы не указаны, то добавляются все месяцы от 1 до 12
@@ -162,15 +163,15 @@ func NextDate(now time.Time, date string, repeat string) (string, error) {
 		}
 
 	default:
-		return "", errors.New("неподдерживаемый формат правила повторения: " + repeat)
+		return "", errors.New("Unsupported repetition rule format: " + repeat)
 	}
 
 	// Проверка, больше ли следующая дата указанного времени
 	if nextDate.Before(now) {
-		return "", errors.New("следующая дата должна быть позже текущей даты")
+		return "", errors.New("The next date must be later than the current date.")
 	}
 	// Возвращается вычисленная следующая дата
-	return nextDate.Format("20060102"), nil
+	return nextDate.Format(global.DateFormat), nil
 }
 
 // parseDays - вспомогательная функция для парсинга дней месяца
@@ -257,5 +258,5 @@ func getEarliestDate(dates []time.Time) string {
 	}
 
 	// Возвращение самой ранней даты в формате YYYYMMDD
-	return earliest.Format("20060102")
+	return earliest.Format(global.DateFormat)
 }

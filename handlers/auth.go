@@ -10,7 +10,7 @@ import (
 	"github.com/golang-jwt/jwt/v4"
 )
 
-// Определение секретноого ключа для подписи
+// Определение секретного ключа для подписи
 var secretKey = []byte("secret_key")
 
 // SignInHandler - обработчик для входа в систему
@@ -26,6 +26,7 @@ func SignInHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Получение ожидаемого пароля из переменных окружения
 	expectedPassword := os.Getenv("TODO_PASSWORD")
+
 	// Сравнение введенного пароля с ожидаемым
 	if body.Password != expectedPassword {
 		http.Error(w, `{"error": "invalid password"}`, http.StatusUnauthorized)

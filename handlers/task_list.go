@@ -4,13 +4,11 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
+	"m/global"
 	"m/models"
 	"net/http"
 	"time"
 )
-
-// Максимальное количество задач, возвращаемых в ответе
-const maxTasks = 50
 
 // GetTaskListHandler - обработчик для получения списка задач
 func GetTaskListHandler(db *sql.DB) http.HandlerFunc {
@@ -18,14 +16,14 @@ func GetTaskListHandler(db *sql.DB) http.HandlerFunc {
 
 		// Проверка метода GET
 		if r.Method != http.MethodGet {
-			writeError(w, "Метод не разрешен", http.StatusMethodNotAllowed)
+			writeError(w, "Method is not allowed", http.StatusMethodNotAllowed)
 			return
 		}
 
 		// Получение параметра поиска search из запроса
 		search := r.URL.Query().Get("search")
 		// Ограничение количества возвращаемых задач
-		limit := maxTasks
+		limit := global.MaxTasks
 		// Строка SQL-запроса
 		var sqlQuery string
 		// Слайс аргументов для подготовленного запроса
@@ -38,7 +36,7 @@ func GetTaskListHandler(db *sql.DB) http.HandlerFunc {
 			// Формирование SQL-запроса для поиска задач по конкретной дате
 			sqlQuery = "SELECT id, date, title, comment, repeat FROM scheduler WHERE date = ? LIMIT ?"
 			// Добавление отформатированной даты и лимита к аргументам
-			args = append(args, formattedDate.Format("20060102"), limit)
+			args = append(args, formattedDate.Format(global.DateFormat), limit)
 		} else {
 			// Использование LIKE для поиска по заголовку и комментарию
 			sqlQuery = "SELECT id, date, title, comment, repeat FROM scheduler WHERE title LIKE ? OR comment LIKE ? ORDER BY date ASC LIMIT ?"
@@ -48,7 +46,7 @@ func GetTaskListHandler(db *sql.DB) http.HandlerFunc {
 		// Выполнение подготовленного запроса с аргументами к базе данных
 		rows, err := db.Query(sqlQuery, args...)
 		if err != nil {
-			writeError(w, "Ошибка выполнения запроса к базе данных", http.StatusInternalServerError)
+			writeError(w, "Database query execution error", http.StatusInternalServerError)
 			return
 		}
 		// Гарантированное закрытие результата после использования
@@ -61,7 +59,7 @@ func GetTaskListHandler(db *sql.DB) http.HandlerFunc {
 			var task models.Task
 			// Считывание значений в структуру Task
 			if err := rows.Scan(&task.ID, &task.Date, &task.Title, &task.Comment, &task.Repeat); err != nil {
-				writeError(w, "Ошибка считывания данных задачи", http.StatusInternalServerError)
+				writeError(w, "Error reading the task data", http.StatusInternalServerError)
 				return
 			}
 			// Добавление задач в слайс
@@ -70,7 +68,7 @@ func GetTaskListHandler(db *sql.DB) http.HandlerFunc {
 
 		// Проверка на наличие ошибок в процессе итерации строк
 		if err := rows.Err(); err != nil {
-			writeError(w, "Ошибка при переборе задач", http.StatusInternalServerError)
+			writeError(w, "Error while iterating through tasks", http.StatusInternalServerError)
 			return
 		}
 
@@ -78,7 +76,7 @@ func GetTaskListHandler(db *sql.DB) http.HandlerFunc {
 		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 		// Сериализация слайса задач в JSON и отправка его в ответе
 		if err := json.NewEncoder(w).Encode(map[string]interface{}{"tasks": tasks}); err != nil {
-			writeError(w, "Ошибка кодирования JSON", http.StatusInternalServerError)
+			writeError(w, "JSON encoding error", http.StatusInternalServerError)
 			return
 		}
 	}

@@ -19,7 +19,7 @@ func SwitcherHandler(db *sql.DB) http.HandlerFunc {
 		case http.MethodDelete:
 			DeleteTaskHandler(db)(w, r)
 		default:
-			http.Error(w, "Метод не разрешен", http.StatusMethodNotAllowed)
+			http.Error(w, "Method is not allowed", http.StatusMethodNotAllowed)
 		}
 	}
 }

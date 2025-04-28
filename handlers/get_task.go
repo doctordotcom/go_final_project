@@ -15,21 +15,21 @@ func GetTaskHandler(db *sql.DB) http.HandlerFunc {
 
 		// Проверка, что метод запроса - GET
 		if r.Method != http.MethodGet {
-			http.Error(w, "Метод не разрешен", http.StatusMethodNotAllowed)
+			http.Error(w, "Method is not allowed", http.StatusMethodNotAllowed)
 			return
 		}
 		// Получение параметра id из URL
 		idStr := r.URL.Query().Get("id")
 		if idStr == "" {
 			w.WriteHeader(http.StatusBadRequest)
-			json.NewEncoder(w).Encode(map[string]string{"error": "Не указан идентификатор"})
+			json.NewEncoder(w).Encode(map[string]string{"error": "ID not specified"})
 			return
 		}
 
 		// Проверка на корректный id
 		if _, err := strconv.Atoi(idStr); err != nil {
 			w.WriteHeader(http.StatusBadRequest)
-			json.NewEncoder(w).Encode(map[string]string{"error": "Некорректный идентификатор"})
+			json.NewEncoder(w).Encode(map[string]string{"error": "Invalid ID"})
 			return
 		}
 
@@ -46,7 +46,7 @@ func GetTaskHandler(db *sql.DB) http.HandlerFunc {
 			if err == sql.ErrNoRows {
 				// Установка HTTP-статуса "Not Found" и формирование ответа с сообщением об ошибке
 				w.WriteHeader(http.StatusNotFound)
-				json.NewEncoder(w).Encode(map[string]string{"error": "Задача не найдена"})
+				json.NewEncoder(w).Encode(map[string]string{"error": "Issue not found"})
 			} else {
 				// Вызов вспомогательной функции для записи ошибки
 				writeError(w, "Ошибка выполнения запроса к базе данных", http.StatusInternalServerError)

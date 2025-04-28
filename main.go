@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"m/handlers"
 	"m/middleware"
 	"m/scheduler"
@@ -18,14 +17,21 @@ func main() {
 	// Загрузка переменных окружения из .env файла
 	err := godotenv.Load()
 	if err != nil {
-		log.Fatal("Error loading .env file")
+		// log.Fatal("Error loading .env file")
+		fmt.Println("Error loading .env file")
+		os.Exit(1)
 	}
 
 	// Открытие соединения с базой данных
 	db, err := scheduler.OpenDatabase()
 	if err != nil {
-		log.Fatal(err)
+		// log.Fatal(err)
+		fmt.Println("Error opening database:", err)
+		os.Exit(1)
 	}
+
+	// Закрытие соединения после работы с базой данных
+	defer db.Close()
 
 	// Обработка запросов на вход в систему
 	http.Handle("/api/signin", http.HandlerFunc(handlers.SignInHandler))
@@ -55,9 +61,11 @@ func main() {
 	address := fmt.Sprintf(":%s", port)
 
 	// Логирование на всякий случай
-	log.Printf("Starting server on port %s...\n", port)
+	// log.Printf("Starting server on port %s...\n", port)
+	fmt.Printf("Starting server on port %s...\n", port)
 
 	// Запуска сервера и логирование ошибки, если она возникнет
-	log.Fatal(http.ListenAndServe(address, nil))
+	// log.Fatal(http.ListenAndServe(address, nil))
+	fmt.Println(http.ListenAndServe(address, nil))
 
 }

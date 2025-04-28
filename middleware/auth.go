@@ -10,13 +10,16 @@ import (
 
 // Секретный ключ для подписи и проверки JWT-токенов
 var secretKey = []byte("secret_key")
+var password string
+
+func init() {
+	// Получение пароля из переменной окружения один раз при старте
+	password = os.Getenv("TODO_PASSWORD")
+}
 
 // AuthMiddleware - функция для проверки аутентификации пользователя через JWT-токен
 func AuthMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-
-		// Получение пароля из переменной окружения TODO_PASSWORD
-		password := os.Getenv("TODO_PASSWORD")
 
 		// Если переменная окружения пуста, пропускается проверка и вызывается следующий обработчик
 		if password == "" {

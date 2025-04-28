@@ -22,16 +22,19 @@
 
     `main.go` (главный файл запуска приложения - ранее был в директории cmd, но так не проходили тесты гитхаба)
 
+    `global` 
+    - директория с файлом global.go, в котором хранятся константы, которые можно использовать в разных пакетах
+
     `handlers (все обработчики запросов здесь):`
     - auth.go с обработчиком проверки аутентификации по паролю для входа в систему SignInHandler.
-    - DeleteTask.go с обработчиком запроса на удаление задачи DeleteTaskHandler.
-    - DoneTask.go с обработчиком DoneTaskHandler, который отмечает задачу выполненной и переносит, либо удаляет её.
-    - GetTask.go с обработчиком GetTaskHandler, который нужен для получения полей задачи перед её редактированием.
-    - HandlerSwitcherAndErrors.go , содержащий код обработки ошибок writeError и SwitcherHandler - переключатель между хендлерами PostTaskHandler, GetTaskHandler, PutTaskHandler, а также DeleteTaskHandler.
-    - NextDate.go с обработчиком GetNextDateHandler для получения следующей даты.
-    - PostTask.go с обработчиком для добавления задачи PostTaskHandler.
-    - PutTask.go с обработчиком PutTaskHandler для передачи обновлённых полей задачи после её редактирования
-    - TaskList.go с обработчиком GetTaskListHandler для получения списка задач, а также функцией isDate, проверяющей, является ли строка датой в нужном формате.
+    - delete_task.go с обработчиком запроса на удаление задачи DeleteTaskHandler.
+    - done_task.go с обработчиком DoneTaskHandler, который отмечает задачу выполненной и переносит, либо удаляет её.
+    - get_task.go с обработчиком GetTaskHandler, который нужен для получения полей задачи перед её редактированием.
+    - next_date.go с обработчиком GetNextDateHandler для получения следующей даты.
+    - post_task.go с обработчиком для добавления задачи PostTaskHandler.
+    - put_task.go с обработчиком PutTaskHandler для передачи обновлённых полей задачи после её редактирования
+    - switcher_and_errors.go , содержащий код обработки ошибок writeError и SwitcherHandler - переключатель между хендлерами PostTaskHandler, GetTaskHandler, PutTaskHandler, а также DeleteTaskHandler.
+    - task_list.go с обработчиком GetTaskListHandler для получения списка задач, а также функцией isDate, проверяющей, является ли строка датой в нужном формате.
 
     `middleware:`
     - одноимённый с хендлером файл auth.go с функцией AuthMiddleware для проверки аутентификации пользователя через JWT-токен во время обработок запросов через SwitcherHandler, DoneTaskHandler и GetTaskListHandler.

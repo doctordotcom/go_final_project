@@ -2,7 +2,7 @@ package scheduler
 
 import (
 	"database/sql"
-	"log"
+	"fmt"
 	"os"
 	"path/filepath"
 
@@ -21,7 +21,9 @@ func OpenDatabase() (*sql.DB, error) {
 		// os.Executable возвращает путь к исполняемому файлу программы
 		appPath, err := os.Executable()
 		if err != nil {
-			log.Fatal(err)
+			// log.Fatal(err)
+			fmt.Println("Fatal error:", err)
+			os.Exit(1)
 		}
 		// filepath.Join объединяет несколько путей в один.
 		// filepath.Dir возвращает путь к директории, в которой находится файл.
@@ -54,22 +56,30 @@ func createDatabase(dbFile string) error {
 	}
 	// Проверка существования sql файла
 	if _, err := os.Stat("scheduler.sql"); os.IsNotExist(err) {
-		return log.Output(2, "Файл scheduler.sql не найден")
+		// return log.Output(2, "The scheduler.sql file was not found")
+		fmt.Printf("The scheduler.sql file was not found\n")
+		return err
 	}
 	// Чтение sql файла
 	n, err := os.ReadFile("scheduler.sql")
 	if err != nil {
-		return log.Output(2, "Не удалось прочесть файл scheduler.sql: "+err.Error())
+		// return log.Output(2, "Couldn't read the scheduler.sql file: "+err.Error())
+		fmt.Printf("Couldn't read the scheduler.sql file: %v\n", err)
+		return err
 	}
 	// Открытие базы данных
 	db, err := sql.Open("sqlite", dbFile)
 	if err != nil {
-		return log.Output(2, "Не удалось подключиться к базе данных: "+err.Error())
+		// return log.Output(2, "Couldn't connect to the database: "+err.Error())
+		fmt.Printf("Couldn't connect to the database: %v\n", err)
+		return err
 	}
 	// Выполнение sql запроса
 	m := string(n)
 	if _, err = db.Exec(m); err != nil {
-		return log.Output(2, "Ошибка выполнения sql запроса: "+err.Error())
+		// return log.Output(2, "Sql query execution error: "+err.Error())
+		fmt.Printf("Sql query execution error: %v\n", err)
+		return err
 	}
 	return nil
 }

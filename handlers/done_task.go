@@ -16,7 +16,7 @@ func DoneTaskHandler(db *sql.DB) http.HandlerFunc {
 		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 		// Проверка метода Post
 		if r.Method != http.MethodPost {
-			http.Error(w, "Метод не разрешен", http.StatusMethodNotAllowed)
+			http.Error(w, "Method is not allowed", http.StatusMethodNotAllowed)
 			return
 		}
 
@@ -24,14 +24,14 @@ func DoneTaskHandler(db *sql.DB) http.HandlerFunc {
 		idStr := r.URL.Query().Get("id")
 		if idStr == "" {
 			w.WriteHeader(http.StatusBadRequest)
-			json.NewEncoder(w).Encode(map[string]string{"error": "Не указан идентификатор"})
+			json.NewEncoder(w).Encode(map[string]string{"error": "ID not specified"})
 			return
 		}
 
 		// Проверка на корректный id
 		if _, err := strconv.Atoi(idStr); err != nil {
 			w.WriteHeader(http.StatusBadRequest)
-			json.NewEncoder(w).Encode(map[string]string{"error": "Некорректный идентификатор"})
+			json.NewEncoder(w).Encode(map[string]string{"error": "Invalid ID"})
 			return
 		}
 
@@ -45,10 +45,10 @@ func DoneTaskHandler(db *sql.DB) http.HandlerFunc {
 			if err == sql.ErrNoRows {
 				// Если задача не найдена, возвращается ошибка
 				w.WriteHeader(http.StatusNotFound)
-				json.NewEncoder(w).Encode(map[string]string{"error": "Задача не найдена"})
+				json.NewEncoder(w).Encode(map[string]string{"error": "Issue not found"})
 			} else {
 				// Ошибка базы данных
-				writeError(w, "Ошибка выполнения запроса к базе данных", http.StatusInternalServerError)
+				writeError(w, "Database query execution error", http.StatusInternalServerError)
 			}
 			return
 		}
@@ -58,7 +58,7 @@ func DoneTaskHandler(db *sql.DB) http.HandlerFunc {
 			q := `DELETE FROM scheduler WHERE id = ?`
 			_, err := db.Exec(q, task.ID)
 			if err != nil {
-				writeError(w, "Ошибка обновления задачи", http.StatusInternalServerError)
+				writeError(w, "Issue update error", http.StatusInternalServerError)
 				return
 			}
 			// Возвращение пустого JSON {} после удаления разовой задачи
@@ -70,24 +70,24 @@ func DoneTaskHandler(db *sql.DB) http.HandlerFunc {
 		// Периодическая задача
 		nextDate, err := rules.NextDate(time.Now(), task.Date, task.Repeat)
 		if err != nil {
-			writeError(w, "Ошибка даты: "+err.Error(), http.StatusInternalServerError)
+			writeError(w, "Date error: "+err.Error(), http.StatusInternalServerError)
 		}
 		task.Date = nextDate
 		// Проверка существования задачи и обновление её
 		query := `UPDATE scheduler SET date = ?, title = ?, comment = ?, repeat = ? WHERE id = ?`
 		res, err := db.Exec(query, task.Date, task.Title, task.Comment, task.Repeat, task.ID)
 		if err != nil {
-			writeError(w, "Ошибка обновления задачи", http.StatusInternalServerError)
+			writeError(w, "Issue update error", http.StatusInternalServerError)
 			return
 		}
 		// Проверка, была ли задача найдена и обновлена
 		rowsAffected, err := res.RowsAffected()
 		if err != nil {
-			writeError(w, "Ошибка проверки обновленной задачи", http.StatusInternalServerError)
+			writeError(w, "Error checking the updated issue", http.StatusInternalServerError)
 			return
 		}
 		if rowsAffected == 0 {
-			writeError(w, "Задача не найдена", http.StatusNotFound)
+			writeError(w, "Issue not found", http.StatusNotFound)
 			return
 		}
 		// Возвращение пустого JSON {}
